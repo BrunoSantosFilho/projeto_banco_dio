@@ -55,23 +55,23 @@ while True:
         valor = float(input("\nInforme o valor do saque: "))
 
         if saldo <= 0:
-            print("Saldo insufuciente para a realização da operação")
+            print("\nSaldo insufuciente para a realização da operação")
 
         elif valor <= 0:
-            print("Valor informado inválido")
+            print("\nValor informado inválido")
 
         elif valor > limite_por_saque:
             print("Operação não realizada. O limite de R$500 por saque foi ultrapassado.")
 
         elif numero_de_saques >= limite_saques:
-            print("Operação não realizada. O limite de 3 saques foi atingido. ")
+            print("\nOperação não realizada. O limite de 3 saques foi atingido. ")
 
         else:
              print("\n\n=============================================")
-             print(f"\nSaque de R$ {valor:.2f} realizado com sucesso")
+             print(f"\nSaque de R$ {valor:.2f} realizado com sucesso\n")
              print("=============================================\n\n")
              saldo -= valor
-             extrato += f"- R${valor:.2f}"
+             extrato += f"- R${valor:.2f}\n"
              numero_de_saques += 1
 
 
@@ -90,7 +90,7 @@ while True:
 
 
     elif opção == "4":
-        print("\nObrigado e até logo!")
+        print("\nObrigado e até logo!\n")
         break
        
        
