@@ -12,4 +12,6 @@ Repositório criado para base do meu curso de Python Developer Full Stack Suzano
 
 => main: versão final atualizada 
 
-=> v1: versão inicial utilizada para conclusão da primeira parte do desafio 
+=> v1: versão inicial utilizada para conclusão da primeira parte do desafio (Criando um sistema bancário em Python)
+
+=> v2: versão adaptada para a conclusão do segundo desafio do projeto (Otimizando o sistema bancário com funções em Python) 
