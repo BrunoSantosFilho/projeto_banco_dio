@@ -1,174 +1,126 @@
 
+"""
+Este projeto foi desenvolvido com apoio do ChatGPT 
+por estar iniciando meus estudos em Programação Orientada a 
+Objetos, contei com suporte para estruturar o sistema e entender 
+melhor como funcionam os conceitos de abstração, herança, polimorfismo e 
+composição.
 
-import os
+Ainda estou aprendendo e pretendo continuar estudando Python, 
+aprimorar meus conhecimentos e voltar a trabalhar neste projeto 
+com mais domínio no futuro.
 
-
-def depositar(valor, saldo, extrato, /):
-    if valor <= 0:
-        print("Valor informado inválido")
-    else:
-        saldo += valor
-        extrato += f"+ R${valor:.2f}\n"
-        print("\n\n=============================================")
-        print(f"\nDepósito de R$ {valor:.2f} realizado com sucesso!\n")
-        print("=============================================\n\n")
-    return saldo, extrato
+"""
 
 
-def sacar(*, valor, saldo, extrato, limite_por_saque, limite_saques, numero_de_saques):
-    if valor > saldo:
-        print("\nSaldo insuficiente para a realização da operação")
-    elif valor <= 0:
-        print("\nValor informado inválido")
-    elif valor > limite_por_saque:
-        print("Operação não realizada. O limite de R$500 por saque foi ultrapassado.")
-    elif numero_de_saques >= limite_saques:
-        print("\nOperação não realizada. O limite de 3 saques foi atingido.")
-    else:
-        print("\n\n=============================================")
-        print(f"\nSaque de R$ {valor:.2f} realizado com sucesso\n")
-        print("=============================================\n\n")
-        saldo -= valor
-        extrato += f"- R${valor:.2f}\n"
-        numero_de_saques += 1
-    return saldo, extrato, numero_de_saques
+from abc import ABC, abstractmethod
 
+# -------------------------------
+# Interface Transacao (Classe Abstrata)
+# -------------------------------
+class Transacao(ABC):
+    @abstractmethod
+    def registrar(self, conta):
+        pass
 
-def exibir_extrato(saldo, *, extrato):
-    print("\n================EXTRATO================\n")
-    if not extrato:
-        print("Não foram realizadas movimentações.")
-    else:
-        print(extrato)
-    print(f"\nSaldo atualizado: R${saldo:.2f}\n")
-    print("=======================================")
+# -------------------------------
+# Classe Deposito (Herança + Polimorfismo)
+# -------------------------------
+class Deposito(Transacao):
+    def __init__(self, valor):
+        self.valor = valor
 
+    def registrar(self, conta):
+        return conta.depositar(self.valor)
 
-def criar_usuario(usuarios):
-    nome = input("Nome completo: ")
-    data_nascimento = input("Data de nascimento (dd/mm/aaaa): ")
-    cpf = input("Informe os dígitos do CPF (apenas números): ")
+# -------------------------------
+# Classe Saque (Herança + Polimorfismo)
+# -------------------------------
+class Saque(Transacao):
+    def __init__(self, valor):
+        self.valor = valor
 
-    print("\nInforme o endereço.\n")
-    logradouro = input("Logradouro: ")
-    numero = input("Número: ")
-    bairro = input("Bairro: ")
-    cidade = input("Cidade: ")
-    estado = input("Estado: ")
+    def registrar(self, conta):
+        return conta.sacar(self.valor)
 
-    endereco = f"{logradouro}, {numero} - {bairro} - {cidade}/{estado}"
+# -------------------------------
+# Classe Historico (Composição)
+# -------------------------------
+class Historico:
+    def __init__(self):
+        self.transacoes = []
 
-    usuario_existente = []
-    for usuario in usuarios:
-        if usuario["cpf"] == cpf:
-            usuario_existente.append(usuario)
+    def adicionar(self, descricao):
+        self.transacoes.append(descricao)
 
-    if usuario_existente:
-        print("Usuário já cadastrado.")
-        return
+    def exibir(self):
+        print("\nHistórico de transações:")
+        if not self.transacoes:
+            print("- Nenhuma transação registrada.")
+        for transacao in self.transacoes:
+            print(f"- {transacao}")
 
-    novo_usuario = {
-        "nome": nome,
-        "data_nascimento": data_nascimento,
-        "cpf": cpf,
-        "endereco": endereco
-    }
+# -------------------------------
+# Classe Cliente
+# -------------------------------
+class Cliente:
+    def __init__(self, nome):
+        self.nome = nome
 
-    usuarios.append(novo_usuario)
-    print("\nUsuário cadastrado com sucesso!\n")
+# -------------------------------
+# Classe Conta
+# -------------------------------
+class Conta:
+    def __init__(self, numero, cliente):
+        self._numero = numero
+        self._cliente = cliente
+        self._saldo = 0
+        self._historico = Historico()
 
+    def sacar(self, valor):
+        if valor > 0 and valor <= self._saldo:
+            self._saldo -= valor
+            self._historico.adicionar(f"Saque: R${valor:.2f}")
+            print(f"Saque de R${valor:.2f} realizado com sucesso.")
+            return True
+        else:
+            print("Saque inválido.")
+            return False
 
+    def depositar(self, valor):
+        if valor > 0:
+            self._saldo += valor
+            self._historico.adicionar(f"Depósito: R${valor:.2f}")
+            print(f"Depósito de R${valor:.2f} realizado com sucesso.")
+            return True
+        else:
+            print("Depósito inválido.")
+            return False
 
-def criar_conta_corrente(usuarios, contas, numero_conta, agencia):
-    cpf = input("Informe os dígitos do CPF: ")
+    def mostrar_saldo(self):
+        print(f"\nSaldo atual: R${self._saldo:.2f}")
 
-    usuario_encontrado = None
-    for usuario in usuarios:
-        if usuario["cpf"] == cpf:
-            usuario_encontrado = usuario
-            break
+    def mostrar_historico(self):
+        self._historico.exibir()
 
-    if not usuario_encontrado:
-        print("Falha na criação da conta. Usuário não encontrado.")
-        return numero_conta
+# -------------------------------
+# Teste do sistema (Simulação)
+# -------------------------------
+if __name__ == "__main__":
+    cliente = Cliente("Bruno")
+    conta = Conta("001", cliente)
 
-    conta = {
-        "agencia": agencia,
-        "numero_conta": numero_conta,
-        "usuario": usuario_encontrado
-    }
+    # Criando transações
+    t1 = Deposito(300)
+    t2 = Saque(100)
 
-    contas.append(conta)
-    print("Conta criada com sucesso!")
-    return numero_conta + 1
+    # Executando transações
+    t1.registrar(conta)
+    t2.registrar(conta)
 
-
-
-print("Seja bem-vindo ao Black Bank!")
-
-opcoes_menu = {
-    "1": "Depositar",
-    "2": "Sacar",
-    "3": "Extrato",
-    "4": "Criar Usuário",
-    "5": "Criar Conta Corrente",
-    "6": "Sair"
-}
-
-saldo = 0
-extrato = ""
-limite_por_saque = 500
-limite_saques = 3
-numero_de_saques = 0
-usuarios = []
-contas = []
-agencia = "0001"
-numero_conta = 1
-iniciacao_do_sistema = True
-
-while True:
-    if not iniciacao_do_sistema:
-        os.system('cls')
-
-    print("\nPor favor, selecione a opção desejada:\n")
-    for chave, valor in opcoes_menu.items():
-        print(f"[{chave}] {valor}")
-
-    opcao = input("\n => ")
-
-    if opcao == "1":
-        valor = float(input("\nInforme o valor do depósito: "))
-        saldo, extrato = depositar(valor, saldo, extrato)
-
-    elif opcao == "2":
-        valor = float(input("\nInforme o valor do saque: "))
-        saldo, extrato, numero_de_saques = sacar(
-            valor=valor,
-            saldo=saldo,
-            extrato=extrato,
-            limite_por_saque=limite_por_saque,
-            limite_saques=limite_saques,
-            numero_de_saques=numero_de_saques
-        )
-
-    elif opcao == "3":
-        exibir_extrato(saldo, extrato=extrato)
-
-    elif opcao == "4":
-        criar_usuario(usuarios)
-
-    elif opcao == "5":
-        numero_conta = criar_conta_corrente(usuarios, contas, numero_conta, agencia)
-
-    elif opcao == "6":
-        print("\nObrigado e até logo!\n")
-        break
-
-    else:
-        print("\nOpção inválida.")
-
-
-      
+    # Exibindo saldo e histórico
+    conta.mostrar_saldo()
+    conta.mostrar_historico()
                    
                    
 
